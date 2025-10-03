@@ -721,134 +721,137 @@
 </div>
 
 <script>
-    // Theme toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
-    themeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        isDarkMode = document.documentElement.classList.contains('dark');
-        
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: isDarkMode ? '#8b5cf6' : '#2563eb',
-                        dark: isDarkMode ? '#1e293b' : '#f8fafc',
-                        darker: isDarkMode ? '#0f172a' : '#e2e8f0'
-                    }
-                }
+let isDarkMode = true;
+
+// Theme toggle
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+themeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    isDarkMode = document.documentElement.classList.contains('dark');
+
+    tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {
+            colors: {
+                primary: isDarkMode ? '#8b5cf6' : '#2563eb',
+                dark: isDarkMode ? '#1e293b' : '#f8fafc',
+                darker: isDarkMode ? '#0f172a' : '#e2e8f0'
             }
-        };
+        }}
+    };
 
-        if (isDarkMode) {
-            themeIcon.setAttribute('data-feather', 'moon');
-        } else {
-            themeIcon.setAttribute('data-feather', 'sun');
-        }
-        feather.replace();
-
-        document.body.style.display = 'none';
-        document.body.offsetHeight;
-        document.body.style.display = '';
-    });
-
-    // Day selector functionality
-    const daySelectors = document.querySelectorAll('.day-selector');
-    const scheduleDays = document.querySelectorAll('.schedule-day');
-
-    daySelectors.forEach(selector => {
-        selector.addEventListener('click', () => {
-            daySelectors.forEach(s => s.classList.remove('active'));
-            selector.classList.add('active');
-
-            scheduleDays.forEach(day => day.classList.add('hidden'));
-            const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
-            if (dayToShow) dayToShow.classList.remove('hidden');
-        });
-    });
-
-    const daySequence = ['A', 'F', 'D', 'B', 'G', 'E', 'C'];
-    const now = new Date();
-    const daysSinceEpoch = Math.floor(now / (1000 * 60 * 60 * 24));
-    const dayIndex = daysSinceEpoch % daySequence.length;
-    const currentDay = daySequence[dayIndex];
-
-    document.querySelector(`.day-selector[data-day="${currentDay}"]`).classList.add('active');
-    document.querySelectorAll('.schedule-day').forEach(day => day.classList.add('hidden'));
-    document.getElementById(`${currentDay}-day`).classList.remove('hidden');
-
-    function updateCurrentClass() {
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-        let currentClass = null;
-        let nextClass = null;
-
-        const scheduleDay = document.getElementById(`${currentDay}-day`);
-        const classes = scheduleDay.querySelectorAll('.schedule-card');
-
-        const timeToMinutes = (timeStr) => {
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            return hours * 60 + minutes;
-        };
-
-        classes.forEach(classCard => {
-            const timeSpan = classCard.querySelector('.bg-primary\\/10');
-            if (!timeSpan) return;
-            const [startTime, endTime] = timeSpan.textContent.trim().split('-').map(t => t.trim());
-            const startMinutes = timeToMinutes(startTime);
-            const endMinutes = timeToMinutes(endTime);
-
-            const className = classCard.querySelector('.font-medium').textContent;
-            const classSubject = classCard.querySelector('p.text-white').textContent;
-
-            if (currentTime >= startMinutes && currentTime <= endMinutes) {
-                currentClass = `${className}: ${classSubject}`;
-            }
-            if (!nextClass && currentTime < startMinutes && classSubject !== 'FREE') {
-                nextClass = `${className}: ${classSubject} at ${startTime}`;
-            }
-        });
-
-        const currentEl = document.getElementById('current-class');
-        const nextEl = document.getElementById('next-class');
-
-        currentEl.textContent = currentClass 
-            ? `Currently: ${currentClass}` 
-            : currentTime < 8*60 ? "School hasn't started yet" : "Free Period";
-
-        nextEl.textContent = nextClass 
-            ? `Next: ${nextClass}` 
-            : currentTime >= 15*60 ? "No more classes today" : "Check schedule";
-    }
+    if (isDarkMode) themeIcon.setAttribute('data-feather', 'moon');
+    else themeIcon.setAttribute('data-feather', 'sun');
 
     feather.replace();
-</script>
+    document.body.style.display = 'none';
+    document.body.offsetHeight;
+    document.body.style.display = '';
+});
 
-<script>
-    // Header day update
-    const headerDayEl = document.getElementById('header-day');
+// Letter day rotation: skip weekends
+const daySequence = ['A','F','D','B','G','E','C'];
 
-    function updateHeaderDay() {
-        const now = new Date();
-        const daysSinceEpoch = Math.floor(now / (1000 * 60 * 60 * 24));
-        const dayIndex = daysSinceEpoch % daySequence.length;
-        const currentLetter = daySequence[dayIndex];
+// Starting reference: October 3, 2025 is A day
+const firstADay = new Date(2025, 9, 3); // month is 0-indexed (9 = October)
 
-        const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        const weekday = weekdayNames[now.getDay()];
+// Get current letter day
+function getCurrentLetterDay() {
+    const now = new Date();
+    let tempDate = new Date(firstADay);
+    let dayCounter = 0;
 
-        headerDayEl.textContent = `${currentLetter} DAY • ${weekday}`;
+    while (tempDate <= now) {
+        const weekday = tempDate.getDay();
+        if (weekday !== 0 && weekday !== 6) dayCounter++; // skip weekends
+        tempDate.setDate(tempDate.getDate() + 1);
     }
+    const index = (dayCounter - 1) % daySequence.length;
+    return daySequence[index];
+}
 
+let currentDay = getCurrentLetterDay();
+
+// Update header day
+const headerDayEl = document.getElementById('header-day');
+function updateHeaderDay() {
+    const now = new Date();
+    const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const weekday = weekdayNames[now.getDay()];
+    currentDay = getCurrentLetterDay();
+    headerDayEl.textContent = `${currentDay} DAY • ${weekday}`;
+}
+
+// Update current and next class
+function updateCurrentClass() {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    let currentClass = null;
+    let nextClass = null;
+
+    const scheduleDay = document.getElementById(`${currentDay}-day`);
+    if (!scheduleDay) return;
+
+    const classes = scheduleDay.querySelectorAll('.schedule-card');
+    const timeToMinutes = (timeStr) => {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h*60 + m;
+    };
+
+    classes.forEach(card => {
+        const timeSpan = card.querySelector('.bg-primary\\/10');
+        if (!timeSpan) return;
+        const [start, end] = timeSpan.textContent.trim().split('-').map(t=>t.trim());
+        const startMinutes = timeToMinutes(start);
+        const endMinutes = timeToMinutes(end);
+        const className = card.querySelector('.font-medium').textContent;
+        const classSubject = card.querySelector('p.text-white').textContent;
+
+        if (currentTime >= startMinutes && currentTime <= endMinutes) currentClass = `${className}: ${classSubject}`;
+        if (!nextClass && currentTime < startMinutes && classSubject !== 'FREE') nextClass = `${className}: ${classSubject} at ${start}`;
+    });
+
+    const currentEl = document.getElementById('current-class');
+    const nextEl = document.getElementById('next-class');
+    currentEl.textContent = currentClass ? `Currently: ${currentClass}` : (currentTime < 8*60 ? "School hasn't started yet" : "Free Period");
+    nextEl.textContent = nextClass ? `Next: ${nextClass}` : (currentTime >= 15*60 ? "No more classes today" : "Check schedule");
+}
+
+// Day selector
+const daySelectors = document.querySelectorAll('.day-selector');
+const scheduleDays = document.querySelectorAll('.schedule-day');
+daySelectors.forEach(selector => {
+    selector.addEventListener('click', () => {
+        daySelectors.forEach(s => s.classList.remove('active'));
+        selector.classList.add('active');
+        scheduleDays.forEach(d => d.classList.add('hidden'));
+        const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
+        if (dayToShow) dayToShow.classList.remove('hidden');
+    });
+});
+
+// Initialize display
+document.querySelector(`.day-selector[data-day="${currentDay}"]`)?.classList.add('active');
+document.querySelectorAll('.schedule-day').forEach(d=>d.classList.add('hidden'));
+document.getElementById(`${currentDay}-day`)?.classList.remove('hidden');
+updateHeaderDay();
+updateCurrentClass();
+feather.replace();
+
+// Update at midnight 12:01 AM
+const nowDate = new Date();
+const msUntilMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()+1, 0, 1, 0, 0) - nowDate;
+setTimeout(() => {
     updateHeaderDay();
+    updateCurrentClass();
+    setInterval(() => { updateHeaderDay(); updateCurrentClass(); }, 24*60*60*1000);
+}, msUntilMidnight);
 
-    const msUntilMidnight = new Date().setHours(24,0,1,0) - new Date();
-    setTimeout(() => {
-        updateHeaderDay();
-        setInterval(updateHeaderDay, 24 * 60 * 60 * 1000);
-    }, msUntilMidnight);
+// Update current class every minute for accuracy
+setInterval(updateCurrentClass, 60*1000);
 </script>
 
 </body>
 </html>
+
