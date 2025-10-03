@@ -7,855 +7,328 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 <script>
-    let isDarkMode = true;
-    tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    primary: isDarkMode ? '#8b5cf6' : '#2563eb',
-                    dark: isDarkMode ? '#1e293b' : '#f8fafc',
-                    darker: isDarkMode ? '#0f172a' : '#e2e8f0'
-                }
-            }
+  let isDarkMode = true;
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          primary: isDarkMode ? '#8b5cf6' : '#2563eb',
+          dark: isDarkMode ? '#1e293b' : '#f8fafc',
+          darker: isDarkMode ? '#0f172a' : '#e2e8f0'
         }
+      }
     }
+  }
 </script>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body {
-        font-family: 'Inter', sans-serif;
-        color-scheme: light dark;
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --color-primary: #2563eb;
+      --color-dark: #f8fafc;
+      --color-darker: #e2e8f0;
     }
-    @media (prefers-color-scheme: light) {
-        :root {
-            --color-primary: #2563eb;
-            --color-dark: #f8fafc;
-            --color-darker: #e2e8f0;
-        }
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-primary: #8b5cf6;
+      --color-dark: #1e293b;
+      --color-darker: #0f172a;
     }
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --color-primary: #8b5cf6;
-            --color-dark: #1e293b;
-            --color-darker: #0f172a;
-        }
-    }
-    .schedule-card { transition: all 0.3s ease; }
-    .schedule-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
-    .day-selector { transition: all 0.2s ease; }
-    .day-selector:hover { color: #8b5cf6; }
-    .day-selector.active { color: #6d28d9; border-bottom: 2px solid #6d28d9; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #6d28d9; border-radius: 3px; }
+  }
+  .schedule-card { transition: all 0.3s ease; }
+  .schedule-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+  .day-selector { transition: all 0.2s ease; }
+  .day-selector:hover { color: #8b5cf6; }
+  .day-selector.active { color: #6d28d9; border-bottom: 2px solid #6d28d9; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #6d28d9; border-radius: 3px; }
 </style>
 </head>
 <body class="bg-darker text-gray-200 min-h-screen">
+
 <div class="container mx-auto px-4 py-8 max-w-7xl">
-<header class="flex justify-between items-center mb-8">
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-8">
     <div>
-        <h1 class="text-3xl font-bold text-white">Semester <span class="text-primary">1</span></h1>
-        <p class="text-gray-400">Liam Quinn's Sophomore Schedule</p>
+      <h1 class="text-3xl font-bold text-white">Semester <span class="text-primary">1</span></h1>
+      <p class="text-gray-400">Liam Quinn's Sophomore Schedule</p>
     </div>
     <div class="flex items-center space-x-4">
-        <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-            <!-- Classes widget -->
-            <div class="bg-dark p-4 rounded-lg">
-                <div class="flex flex-col">
-                    <div class="flex items-center space-x-2 mb-1">
-                        <i data-feather="book-open" class="text-primary w-4 h-4"></i>
-                        <h3 class="text-xs font-medium text-gray-400">Classes</h3>
-                    </div>
-                    <span class="text-white font-bold text-lg">6</span>
-                </div>
+      <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+        <!-- Classes widget -->
+        <div class="bg-dark p-4 rounded-lg">
+          <div class="flex flex-col">
+            <div class="flex items-center space-x-2 mb-1">
+              <i data-feather="book-open" class="text-primary w-4 h-4"></i>
+              <h3 class="text-xs font-medium text-gray-400">Classes</h3>
             </div>
-            <!-- Today widget (Letter Day) -->
-            <div class="bg-dark p-4 rounded-lg">
-                <div class="flex flex-col">
-                    <div class="flex items-center space-x-2 mb-1">
-                        <i data-feather="calendar" class="text-primary w-4 h-4"></i>
-                        <h3 class="text-xs font-medium text-gray-400">Today</h3>
-                    </div>
-                    <span id="header-day" class="text-white text-sm">A DAY</span>
-                </div>
-            </div>
+            <span class="text-white font-bold text-lg">6</span>
+          </div>
         </div>
-        <!-- User + Theme Toggle -->
-        <div class="flex items-center space-x-3">
-            <div class="flex items-center space-x-2 bg-dark px-3 py-2 rounded-lg">
-                <i data-feather="user" class="text-primary w-4 h-4"></i>
-                <span class="text-sm text-gray-300">lquinn28@student.ignatius.edu</span>
+        <!-- Today widget (Letter Day) -->
+        <div class="bg-dark p-4 rounded-lg">
+          <div class="flex flex-col">
+            <div class="flex items-center space-x-2 mb-1">
+              <i data-feather="calendar" class="text-primary w-4 h-4"></i>
+              <h3 class="text-xs font-medium text-gray-400">Today</h3>
             </div>
-            <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-800 transition">
-                <i data-feather="moon" id="theme-icon" class="text-primary w-4 h-4"></i>
-            </button>
+            <span id="header-day" class="text-white text-sm">A DAY</span>
+          </div>
         </div>
+      </div>
+      <!-- User + Theme Toggle -->
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 bg-dark px-3 py-2 rounded-lg">
+          <i data-feather="user" class="text-primary w-4 h-4"></i>
+          <span class="text-sm text-gray-300">lquinn28@student.ignatius.edu</span>
+        </div>
+        <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-800 transition">
+          <i data-feather="moon" id="theme-icon" class="text-primary w-4 h-4"></i>
+        </button>
+      </div>
     </div>
-</header>
-</div>
-</header>
+  </header>
 
-<!-- Day Selector Buttons -->
-<div class="mb-6 overflow-x-auto">
+  <!-- Day Selector Buttons -->
+  <div class="mb-6 overflow-x-auto">
     <div class="flex space-x-2 border-b border-gray-800 pb-2">
-        <button class="day-selector px-3 py-2 rounded-t-lg active" data-day="A">A Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="B">B Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="C">C Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="D">D Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="E">E Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="F">F Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="G">G Day</button>
-        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="WED">Wednesday</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg active" data-day="A">A Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="B">B Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="C">C Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="D">D Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="E">E Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="F">F Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="G">G Day</button>
+      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="WED">Wednesday</button>
     </div>
-</div>
+  </div>
 
-<!-- Schedule Container -->
-<div id="schedule-container">
+  <!-- Schedule Container -->
+  <div id="schedule-container">
     <!-- A Day Schedule -->
     <div class="schedule-day" id="A-day">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Column 1 -->
-            <div>
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">A Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                    </div>
-                    <p class="text-white">Chemistry</p>
-                    <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">B Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                    </div>
-                    <p class="text-white">FREE</p>
-                    <p class="text-gray-400 text-sm">-x-</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">C Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
-                    </div>
-                    <p class="text-white">Spanish II</p>
-                    <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-                </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Column 1 -->
+        <div>
+          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">A Class</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
             </div>
-
-            <!-- Column 2 -->
-            <div>
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
-                    </div>
-                    <p class="text-white">Advisory-TUE</p>
-                    <p class="text-gray-400 text-sm">-x-</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">D Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                    </div>
-                    <p class="text-white">Modern U.S. History</p>
-                    <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">E Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                    </div>
-                    <p class="text-white">English II</p>
-                    <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-                </div>
+            <p class="text-white">Chemistry</p>
+            <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
+          </div>
+          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">B Class</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
             </div>
+            <p class="text-white">FREE</p>
+            <p class="text-gray-400 text-sm">-x-</p>
+          </div>
+          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">C Class</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
+            </div>
+            <p class="text-white">Spanish II</p>
+            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
+          </div>
         </div>
+        <!-- Column 2 -->
+        <div>
+          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
+            </div>
+            <p class="text-white">Advisory-TUE</p>
+            <p class="text-gray-400 text-sm">-x-</p>
+          </div>
+          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">D Class</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
+            </div>
+            <p class="text-white">Modern U.S. History</p>
+            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
+          </div>
+          <div class="bg-dark p-4 rounded-lg schedule-card">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-medium text-lg text-primary">E Class</h3>
+              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
+            </div>
+            <p class="text-white">English II</p>
+            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- F Day Schedule (hidden by default) -->
-    <div class="schedule-day hidden" id="F-day">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Column 1 -->
-            <div>
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">F Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                    </div>
-                    <p class="text-white">Sophomore Service</p>
-                    <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">G Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                    </div>
-                    <p class="text-white">Geometry</p>
-                    <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
-                </div>
-
-                <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-medium text-lg text-primary">A Class</h3>
-                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
-                    </div>
-                    <p class="text-white">Chemistry</p>
-                    <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-                </div>
-            </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">B Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">FREE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">C Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Spanish II</p>
-                            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="D-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">D Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                            </div>
-                            <p class="text-white">Modern U.S. History</p>
-                            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">E Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                            </div>
-                            <p class="text-white">English II</p>
-                            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:03</span>
-                            </div>
-                            <p class="text-white">Lunch</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">F Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:10-12:08</span>
-                            </div>
-                            <p class="text-white">Sophmore Service</p>
-                            <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:13-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">G Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">Geometry</p>
-                            <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-<div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">A Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Chemistry</p>
-                            <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="B-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">B Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                            </div>
-                            <p class="text-white">FREE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">C Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                            </div>
-                            <p class="text-white">Spanish II</p>
-                            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:03</span>
-                            </div>
-                            <p class="text-white">Lunch</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">D Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:10-12:08</span>
-                            </div>
-                            <p class="text-white">Modern U.S. History</p>
-                            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:13-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">E Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">English II</p>
-                            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">F Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Sophmore Service</p>
-                            <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="G-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">G Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                            </div>
-                            <p class="text-white">Geometry</p>
-                            <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">A Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                            </div>
-                            <p class="text-white">Chemistry</p>
-                            <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">B Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
-                            </div>
-                            <p class="text-white">FREE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">C Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">Spanish II</p>
-                            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">D Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Modern U.S. History</p>
-                            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="E-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">E Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                            </div>
-                            <p class="text-white">English II</p>
-                            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">F Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                            </div>
-                            <p class="text-white">Sophmore Service</p>
-                            <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">G Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
-                            </div>
-                            <p class="text-white">Geometry</p>
-                            <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">A Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">Chemistry</p>
-                            <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">B Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">FREE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="C-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">C Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-                            </div>
-                            <p class="text-white">Spanish II</p>
-                            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">D Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-                            </div>
-                            <p class="text-white">Modern U.S. History</p>
-                            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:03</span>
-                            </div>
-                            <p class="text-white">Lunch</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">E Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:10-12:08</span>
-                            </div>
-                            <p class="text-white">English II</p>
-                            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Formation</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:13-12:52</span>
-                            </div>
-                            <p class="text-white">Advisory-TUE</p>
-                            <p class="text-gray-400 text-sm">-x-</p>
-                        </div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">F Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">Sophmore Service</p>
-                            <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">G Class</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Geometry</p>
-                            <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
-                        </div>
-</div>
-                </div>
-            </div>
-<div class="schedule-day hidden" id="WED-day">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Column 1 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Class 1</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:50-9:53</span>
-                            </div>
-                            <p class="text-white">Announcements and First Period Class</p>
-                            <p class="text-gray-400 text-sm">Check schedule for class</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Class 2</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:00-10:58</span>
-                            </div>
-                            <p class="text-white">Second Period Class</p>
-                            <p class="text-gray-400 text-sm">Check schedule for class</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch Group 2</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:05-12:03</span>
-                            </div>
-                            <p class="text-white">Third Period Class</p>
-                            <p class="text-gray-400 text-sm">Spanish II or Geometry or Chemistry</p>
-                        </div>
-                    </div>
-
-                    <!-- Column 2 -->
-                    <div>
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Lunch Group 1</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:38</span>
-                            </div>
-                            <p class="text-white">Third Period Class</p>
-                            <p class="text-gray-400 text-sm">English II or Modern U.S. History or Sophmore Service</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Break</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:38-12:57</span>
-                            </div>
-                            <p class="text-white">Break</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Class 4</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-                            </div>
-                            <p class="text-white">Fourth Period Class</p>
-                            <p class="text-gray-400 text-sm">Check schedule for class</p>
-                        </div>
-
-                        <div class="bg-dark p-4 rounded-lg schedule-card">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="font-medium text-lg text-primary">Class 5</h3>
-                                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-                            </div>
-                            <p class="text-white">Examen and Fifth Period Class</p>
-                            <p class="text-gray-400 text-sm">Check schedule for class</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-</div>
-
-        <div class="mt-12">
-            <h2 class="text-xl font-bold mb-4 text-white">All Classes</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">A Class</h3>
-                    <p class="text-white">Chemistry</p>
-                    <p class="text-gray-400 text-sm mt-1">SC202 • Mr. McGinness</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">B Class</h3>
-                    <p class="text-white">FREE</p>
-                    <p class="text-gray-400 text-sm mt-1">-x-</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">C Class</h3>
-                    <p class="text-white">Spanish II</p>
-                    <p class="text-gray-400 text-sm mt-1">MB416 • Dra. Anderson</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">D Class</h3>
-                    <p class="text-white">Modern U.S. History</p>
-                    <p class="text-gray-400 text-sm mt-1">MB123 • Mr. Pecot</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">E Class</h3>
-                    <p class="text-white">English II</p>
-                    <p class="text-gray-400 text-sm mt-1">MB314 • Mr. McCafferty</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">F Class</h3>
-                    <p class="text-white">Sophmore Service</p>
-                    <p class="text-gray-400 text-sm mt-1">LH125 • Mr. McLaughlin</p>
-                </div>
-                <div class="bg-dark p-4 rounded-lg schedule-card">
-                    <h3 class="font-medium text-lg text-primary mb-2">G Class</h3>
-                    <p class="text-white">Geometry</p>
-                    <p class="text-gray-400 text-sm mt-1">LH323 • Mr. Hjort</p>
-                </div>
-            </div>
-        </div>
-
-       <footer class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-400">
-    <p>© 2023 Semester 1 Schedule • Property of Liam Quinn</p>
-</footer>
-</div>
-    
+    <!-- JS scripts -->
+<script src="https://unpkg.com/feather-icons"></script>
 <script>
-let isDarkMode = true;
+/* ====== DARK MODE ====== */
+let isDarkMode = document.documentElement.classList.contains('dark');
 
-// Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
+
 themeToggle?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    isDarkMode = document.documentElement.classList.contains('dark');
-
-    tailwind.config = {
-        darkMode: 'class',
-        theme: { extend: {
-            colors: {
-                primary: isDarkMode ? '#8b5cf6' : '#2563eb',
-                dark: isDarkMode ? '#1e293b' : '#f8fafc',
-                darker: isDarkMode ? '#0f172a' : '#e2e8f0'
-            }
-        }}
-    };
-
-    if (isDarkMode) themeIcon?.setAttribute('data-feather', 'moon');
-    else themeIcon?.setAttribute('data-feather', 'sun');
-
+    isDarkMode = !isDarkMode;
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    if (themeIcon) themeIcon.setAttribute('data-feather', isDarkMode ? 'moon' : 'sun');
     feather.replace();
-    document.body.style.display = 'none';
-    document.body.offsetHeight;
-    document.body.style.display = '';
 });
 
-// Letter day rotation
+/* ====== LETTER DAY CALCULATION ====== */
 const daySequence = ['A','F','D','B','G','E','C'];
-const firstADay = new Date(2025, 9, 3); // October 3, 2025
+const firstADay = new Date(2025, 9, 3); // Oct 3, 2025
 
 function getCurrentLetterDay() {
     const now = new Date();
     let tempDate = new Date(firstADay);
     let dayCounter = 0;
-    while (tempDate <= now) {
+
+    while (tempDate < now) {
         const weekday = tempDate.getDay();
         if (weekday !== 0 && weekday !== 6) dayCounter++;
         tempDate.setDate(tempDate.getDate() + 1);
     }
-    const index = (dayCounter - 1) % daySequence.length;
-    return daySequence[index];
+
+    return daySequence[dayCounter % daySequence.length];
 }
 
 let currentDay = getCurrentLetterDay();
 
-// Update header
+/* ====== HEADER ====== */
 const headerDayEl = document.getElementById('header-day');
 function updateHeaderDay() {
     const now = new Date();
     const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const weekday = weekdayNames[now.getDay()];
-    currentDay = getCurrentLetterDay();
     headerDayEl.textContent = `${currentDay} DAY • ${weekday}`;
 }
 
-// Update current/next class
+/* ====== CURRENT/NEXT CLASS ====== */
 function updateCurrentClass() {
     const now = new Date();
     const currentTime = now.getHours()*60 + now.getMinutes();
-    let currentClass = null;
-    let nextClass = null;
 
     const scheduleDay = document.getElementById(`${currentDay}-day`);
     if (!scheduleDay) return;
 
     const classes = scheduleDay.querySelectorAll('.schedule-card');
-    const timeToMinutes = (timeStr) => {
-        const [h, m] = timeStr.split(':').map(Number);
+    let currentClass = null;
+    let nextClass = null;
+
+    const toMinutes = t => {
+        const [h,m] = t.split(':').map(Number);
         return h*60 + m;
     };
 
     classes.forEach(card => {
         const timeSpan = card.querySelector('.bg-primary\\/10');
         if (!timeSpan) return;
-        const [start, end] = timeSpan.textContent.trim().split('-').map(t=>t.trim());
-        const startMinutes = timeToMinutes(start);
-        const endMinutes = timeToMinutes(end);
-        const className = card.querySelector('.font-medium').textContent;
-        const classSubject = card.querySelector('p.text-white').textContent;
+        const [start,end] = timeSpan.textContent.trim().split('-').map(t => t.trim());
+        const startM = toMinutes(start);
+        const endM = toMinutes(end);
+        const className = card.querySelector('.font-medium')?.textContent || '';
+        const classSubject = card.querySelector('p.text-white')?.textContent || '';
 
-        if (currentTime >= startMinutes && currentTime <= endMinutes) currentClass = {name: className, subject: classSubject};
-        if (!nextClass && currentTime < startMinutes && classSubject !== 'FREE') nextClass = {name: className, subject: classSubject, start};
+        if (currentTime >= startM && currentTime <= endM) currentClass = {name: className, subject: classSubject};
+        if (!nextClass && currentTime < startM && classSubject !== 'FREE') nextClass = {name: className, subject: classSubject, start};
     });
 
     const currentEl = document.getElementById('current-class');
     const nextEl = document.getElementById('next-class');
-    currentEl.textContent = currentClass ? `Currently: ${currentClass.name}: ${currentClass.subject}` : (currentTime < 8*60 ? "School hasn't started yet" : "Free Period");
-    nextEl.textContent = nextClass ? `Next: ${nextClass.name}: ${nextClass.subject} at ${nextClass.start}` : (currentTime >= 15*60 ? "No more classes today" : "Check schedule");
+
+    currentEl.textContent = currentClass ? `Currently: ${currentClass.name}: ${currentClass.subject}` :
+        (currentTime < 8*60 ? "School hasn't started yet" : "Free Period");
+    nextEl.textContent = nextClass ? `Next: ${nextClass.name}: ${nextClass.subject} at ${nextClass.start}` :
+        (currentTime >= 15*60 ? "No more classes today" : "Check schedule");
 
     highlightCurrentClass(currentClass);
 }
 
-// Highlight current class in "All Classes"
+/* ====== HIGHLIGHT CURRENT CLASS ====== */
+const allClassesList = Array.from(document.querySelectorAll('.mt-12 .schedule-card'));
 function highlightCurrentClass(currentClass) {
-    const allClassesList = document.querySelectorAll('.mt-12 .schedule-card');
     allClassesList.forEach(c => {
         c.style.border = '1px solid lightgray';
         c.style.boxShadow = 'none';
     });
     if (!currentClass) return;
-    const target = Array.from(allClassesList).find(c => c.querySelector('h3').textContent.trim() === currentClass.name);
+    const target = allClassesList.find(c => c.querySelector('h3')?.textContent.trim() === currentClass.name);
     if (target) {
-        target.style.border = `2px solid ${isDarkMode ? '#8b5cf6' : '#2563eb'}`;
-        target.style.boxShadow = `0 0 10px ${isDarkMode ? '#8b5cf6' : '#2563eb'}`;
+        target.style.border = `2px solid var(--primary-color)`;
+        target.style.boxShadow = `0 0 10px var(--primary-color)`;
     }
 }
 
-// Day selector
+/* ====== DAY SELECTOR ====== */
 const daySelectors = document.querySelectorAll('.day-selector');
 const scheduleDays = document.querySelectorAll('.schedule-day');
+
 daySelectors.forEach(selector => {
     selector.addEventListener('click', () => {
         daySelectors.forEach(s => s.classList.remove('active'));
         selector.classList.add('active');
+
         scheduleDays.forEach(d => d.classList.add('hidden'));
         const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
         if (dayToShow) dayToShow.classList.remove('hidden');
+
+        currentDay = selector.dataset.day;
+        updateHeaderDay();
+        updateCurrentClass();
     });
 });
 
-// Initialize
+/* ====== INITIALIZE ====== */
 document.querySelector(`.day-selector[data-day="${currentDay}"]`)?.classList.add('active');
-document.querySelectorAll('.schedule-day').forEach(d=>d.classList.add('hidden'));
+scheduleDays.forEach(d => d.classList.add('hidden'));
 document.getElementById(`${currentDay}-day`)?.classList.remove('hidden');
+
 updateHeaderDay();
 updateCurrentClass();
 feather.replace();
 
-// Update at midnight
+/* ====== UPDATE AT MIDNIGHT ====== */
 const nowDate = new Date();
-const msUntilMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()+1, 0, 1, 0, 0) - nowDate;
+const msUntilMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()+1) - nowDate;
 setTimeout(() => {
+    currentDay = getCurrentLetterDay();
     updateHeaderDay();
     updateCurrentClass();
-    setInterval(() => { updateHeaderDay(); updateCurrentClass(); }, 24*60*60*1000);
+    setInterval(() => { 
+        currentDay = getCurrentLetterDay();
+        updateHeaderDay(); 
+        updateCurrentClass(); 
+    }, 24*60*60*1000);
 }, msUntilMidnight);
 
-// Update every minute
+/* ====== UPDATE EVERY MINUTE ====== */
 setInterval(updateCurrentClass, 60*1000);
 
-// Smooth scrolling to "All Classes" on click
-const allClassCards = document.querySelectorAll('#schedule-container .schedule-card');
-const allClassesList = document.querySelectorAll('.mt-12 .schedule-card');
-
-allClassCards.forEach(card => {
+/* ====== SMOOTH SCROLL ====== */
+const scheduleCards = document.querySelectorAll('#schedule-container .schedule-card');
+scheduleCards.forEach(card => {
     card.addEventListener('click', () => {
-        const className = card.querySelector('.font-medium').textContent.trim();
+        const className = card.querySelector('.font-medium')?.textContent.trim();
         allClassesList.forEach(c => { c.style.border = '1px solid lightgray'; c.style.boxShadow='none'; });
-        const target = Array.from(allClassesList).find(c => c.querySelector('h3').textContent.trim() === className);
+        const target = allClassesList.find(c => c.querySelector('h3')?.textContent.trim() === className);
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            target.style.border = `2px solid ${isDarkMode ? '#8b5cf6' : '#2563eb'}`;
-            target.style.boxShadow = `0 0 10px ${isDarkMode ? '#8b5cf6' : '#2563eb'}`;
+            target.style.border = `2px solid var(--primary-color)`;
+            target.style.boxShadow = `0 0 10px var(--primary-color)`;
         }
     });
 });
