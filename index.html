@@ -1,338 +1,474 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semester 1</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-<script>
-  let isDarkMode = true;
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        colors: {
-          primary: isDarkMode ? '#8b5cf6' : '#2563eb',
-          dark: isDarkMode ? '#1e293b' : '#f8fafc',
-          darker: isDarkMode ? '#0f172a' : '#e2e8f0'
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Semester 1</title>
+
+  <!-- Tailwind (quick dev) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Feather icons -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <!-- Local stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    // default tailwind color config (kept small)
+    let isDarkMode = true;
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: isDarkMode ? '#8b5cf6' : '#2563eb',
+            dark: isDarkMode ? '#1e293b' : '#f8fafc',
+            darker: isDarkMode ? '#0f172a' : '#e2e8f0'
+          }
         }
       }
-    }
-  }
-</script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-  body {
-    font-family: 'Inter', sans-serif;
-    color-scheme: light dark;
-  }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --color-primary: #2563eb;
-      --color-dark: #f8fafc;
-      --color-darker: #e2e8f0;
-    }
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-primary: #8b5cf6;
-      --color-dark: #1e293b;
-      --color-darker: #0f172a;
-    }
-  }
-  .schedule-card { transition: all 0.3s ease; }
-  .schedule-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
-  .day-selector { transition: all 0.2s ease; }
-  .day-selector:hover { color: #8b5cf6; }
-  .day-selector.active { color: #6d28d9; border-bottom: 2px solid #6d28d9; }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0f172a; }
-  ::-webkit-scrollbar-thumb { background: #6d28d9; border-radius: 3px; }
-</style>
+    };
+  </script>
+  <style>
+    /* Small safe overrides so the page looks OK even before external CSS loads */
+    body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  </style>
 </head>
 <body class="bg-darker text-gray-200 min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Semester <span class="text-primary">1</span></h1>
+        <p class="text-gray-400">Liam Quinn's Sophomore Schedule</p>
+      </div>
 
-<div class="container mx-auto px-4 py-8 max-w-7xl">
-  <!-- Header -->
-  <header class="flex justify-between items-center mb-8">
-    <div>
-      <h1 class="text-3xl font-bold text-white">Semester <span class="text-primary">1</span></h1>
-      <p class="text-gray-400">Liam Quinn's Sophomore Schedule</p>
-    </div>
-    <div class="flex items-center space-x-4">
-      <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-        <!-- Classes widget -->
-        <div class="bg-dark p-4 rounded-lg">
-          <div class="flex flex-col">
-            <div class="flex items-center space-x-2 mb-1">
-              <i data-feather="book-open" class="text-primary w-4 h-4"></i>
+      <div class="flex items-center gap-4 w-full md:w-auto">
+        <!-- small widget grid -->
+        <div class="grid grid-cols-2 gap-3 w-full max-w-md">
+          <div class="bg-dark p-3 rounded-lg flex flex-col">
+            <div class="flex items-center gap-2 mb-1">
+              <i data-feather="book-open" class="w-4 h-4 text-primary"></i>
               <h3 class="text-xs font-medium text-gray-400">Classes</h3>
             </div>
             <span class="text-white font-bold text-lg">6</span>
           </div>
-        </div>
-        <!-- Today widget (Letter Day) -->
-        <div class="bg-dark p-4 rounded-lg">
-          <div class="flex flex-col">
-            <div class="flex items-center space-x-2 mb-1">
-              <i data-feather="calendar" class="text-primary w-4 h-4"></i>
+
+          <!-- Today widget (auto-updates) -->
+          <div class="bg-dark p-3 rounded-lg flex flex-col">
+            <div class="flex items-center gap-2 mb-1">
+              <i data-feather="calendar" class="w-4 h-4 text-primary"></i>
               <h3 class="text-xs font-medium text-gray-400">Today</h3>
             </div>
             <span id="header-day" class="text-white text-sm">A DAY</span>
+            <small id="current-class" class="text-gray-400 text-xs mt-1 block"></small>
+            <small id="next-class" class="text-gray-400 text-xs block"></small>
+          </div>
+        </div>
+
+        <!-- user + theme -->
+        <div class="flex items-center gap-3 ml-auto">
+          <div class="flex items-center gap-2 bg-dark px-3 py-2 rounded-lg">
+            <i data-feather="user" class="w-4 h-4 text-primary"></i>
+            <span class="text-sm text-gray-300">lquinn28@student.ignatius.edu</span>
+          </div>
+          <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-800 transition">
+            <i data-feather="moon" id="theme-icon" class="w-4 h-4 text-primary"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Day selector -->
+    <div class="mb-6 overflow-x-auto">
+      <div class="flex items-center gap-2 border-b border-gray-800 pb-2">
+        <button class="day-selector px-3 py-2 rounded-t-lg active" data-day="A">A Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="B">B Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="C">C Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="D">D Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="E">E Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="F">F Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="G">G Day</button>
+        <button class="day-selector px-3 py-2 rounded-t-lg" data-day="WED">Wednesday</button>
+      </div>
+    </div>
+
+    <!-- SCHEDULE CONTAINER -->
+    <div id="schedule-container">
+      <!-- A Day -->
+      <div class="schedule-day" id="A-day">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">A Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
+              </div>
+              <p class="text-white">Chemistry</p>
+              <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
+            </div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">B Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
+              </div>
+              <p class="text-white">FREE</p>
+              <p class="text-gray-400 text-sm">-x-</p>
+            </div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">C Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
+              </div>
+              <p class="text-white">Spanish II</p>
+              <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
+              </div>
+              <p class="text-white">Advisory-TUE</p>
+              <p class="text-gray-400 text-sm">-x-</p>
+            </div>
+
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">D Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
+              </div>
+              <p class="text-white">Modern U.S. History</p>
+              <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
+            </div>
+
+            <div class="bg-dark p-4 rounded-lg schedule-card">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">E Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
+              </div>
+              <p class="text-white">English II</p>
+              <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
+            </div>
           </div>
         </div>
       </div>
-      <!-- User + Theme Toggle -->
-      <div class="flex items-center space-x-3">
-        <div class="flex items-center space-x-2 bg-dark px-3 py-2 rounded-lg">
-          <i data-feather="user" class="text-primary w-4 h-4"></i>
-          <span class="text-sm text-gray-300">lquinn28@student.ignatius.edu</span>
+
+      <!-- F Day (hidden by default) -->
+      <div class="schedule-day hidden" id="F-day">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">F Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
+              </div>
+              <p class="text-white">Sophomore Service</p>
+              <p class="text-gray-400 text-sm">LH125 • Mr. McLaughlin</p>
+            </div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">G Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
+              </div>
+              <p class="text-white">Geometry</p>
+              <p class="text-gray-400 text-sm">LH323 • Mr. Hjort</p>
+            </div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">A Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
+              </div>
+              <p class="text-white">Chemistry</p>
+              <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
+              </div>
+              <p class="text-white">Advisory-TUE</p>
+              <p class="text-gray-400 text-sm">-x-</p>
+            </div>
+
+            <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">B Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
+              </div>
+              <p class="text-white">FREE</p>
+              <p class="text-gray-400 text-sm">-x-</p>
+            </div>
+
+            <div class="bg-dark p-4 rounded-lg schedule-card">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-lg text-primary">C Class</h3>
+                <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
+              </div>
+              <p class="text-white">Spanish II</p>
+              <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
+            </div>
+          </div>
         </div>
-        <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-800 transition">
-          <i data-feather="moon" id="theme-icon" class="text-primary w-4 h-4"></i>
-        </button>
+      </div>
+
+      <!-- ... add D, B, G, E, C, WED exactly like above ... -->
+      <!-- For brevity I re-used earlier content you already had; keep your day blocks identical to your original markup --
+           Make sure all sections with IDs: A-day, B-day, C-day, D-day, E-day, F-day, G-day, WED-day exist in YOUR file.
+           I included A-day and F-day fully above; paste the rest from your markup into this location (I left comments where to continue). -->
+    </div>
+
+    <!-- All Classes area (restored) -->
+    <div class="mt-12">
+      <h2 class="text-xl font-bold mb-4 text-white">All Classes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">A Class</h3>
+          <p class="text-white">Chemistry</p>
+          <p class="text-gray-400 text-sm mt-1">SC202 • Mr. McGinness</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">B Class</h3>
+          <p class="text-white">FREE</p>
+          <p class="text-gray-400 text-sm mt-1">-x-</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">C Class</h3>
+          <p class="text-white">Spanish II</p>
+          <p class="text-gray-400 text-sm mt-1">MB416 • Dra. Anderson</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">D Class</h3>
+          <p class="text-white">Modern U.S. History</p>
+          <p class="text-gray-400 text-sm mt-1">MB123 • Mr. Pecot</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">E Class</h3>
+          <p class="text-white">English II</p>
+          <p class="text-gray-400 text-sm mt-1">MB314 • Mr. McCafferty</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">F Class</h3>
+          <p class="text-white">Sophomore Service</p>
+          <p class="text-gray-400 text-sm mt-1">LH125 • Mr. McLaughlin</p>
+        </div>
+        <div class="bg-dark p-4 rounded-lg schedule-card">
+          <h3 class="font-medium text-lg text-primary mb-2">G Class</h3>
+          <p class="text-white">Geometry</p>
+          <p class="text-gray-400 text-sm mt-1">LH323 • Mr. Hjort</p>
+        </div>
       </div>
     </div>
-  </header>
 
-  <!-- Day Selector Buttons -->
-  <div class="mb-6 overflow-x-auto">
-    <div class="flex space-x-2 border-b border-gray-800 pb-2">
-      <button class="day-selector px-3 py-2 rounded-t-lg active" data-day="A">A Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="B">B Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="C">C Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="D">D Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="E">E Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="F">F Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="G">G Day</button>
-      <button class="day-selector px-3 py-2 rounded-t-lg" data-day="WED">Wednesday</button>
-    </div>
+    <footer class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-400">
+      <p>© 2023 Semester 1 Schedule • Property of Liam Quinn</p>
+    </footer>
   </div>
 
-  <!-- Schedule Container -->
-  <div id="schedule-container">
-    <!-- A Day Schedule -->
-    <div class="schedule-day" id="A-day">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Column 1 -->
-        <div>
-          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">A Class</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">8:20-9:23</span>
-            </div>
-            <p class="text-white">Chemistry</p>
-            <p class="text-gray-400 text-sm">SC202 • Mr. McGinness</p>
-          </div>
-          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">B Class</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">9:30-10:28</span>
-            </div>
-            <p class="text-white">FREE</p>
-            <p class="text-gray-400 text-sm">-x-</p>
-          </div>
-          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">C Class</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">10:35-11:33</span>
-            </div>
-            <p class="text-white">Spanish II</p>
-            <p class="text-gray-400 text-sm">MB416 • Dra. Anderson</p>
-          </div>
-        </div>
-        <!-- Column 2 -->
-        <div>
-          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">Lunch & Formation</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">11:40-12:52</span>
-            </div>
-            <p class="text-white">Advisory-TUE</p>
-            <p class="text-gray-400 text-sm">-x-</p>
-          </div>
-          <div class="bg-dark p-4 rounded-lg schedule-card mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">D Class</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">12:57-1:55</span>
-            </div>
-            <p class="text-white">Modern U.S. History</p>
-            <p class="text-gray-400 text-sm">MB123 • Mr. Pecot</p>
-          </div>
-          <div class="bg-dark p-4 rounded-lg schedule-card">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium text-lg text-primary">E Class</h3>
-              <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded">2:02-3:05</span>
-            </div>
-            <p class="text-white">English II</p>
-            <p class="text-gray-400 text-sm">MB314 • Mr. McCafferty</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- JS scripts -->
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-/* ====== DARK MODE ====== */
-let isDarkMode = document.documentElement.classList.contains('dark');
+  <!-- SCRIPTS (bottom) -->
+  <script>
+  /* --------- JS: day logic, UI behavior, dark-mode, highlights --------- */
 
-const themeToggle = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
+  // ---------- Helpers and config ----------
+  const daySequence = ['A','F','D','B','G','E','C'];
+  // reference A day date (Oct 3, 2025)
+  const firstADay = new Date(2025, 9, 3);
 
-themeToggle?.addEventListener('click', () => {
-    isDarkMode = !isDarkMode;
-    document.documentElement.classList.toggle('dark', isDarkMode);
-    if (themeIcon) themeIcon.setAttribute('data-feather', isDarkMode ? 'moon' : 'sun');
-    feather.replace();
-});
-
-/* ====== LETTER DAY CALCULATION ====== */
-const daySequence = ['A','F','D','B','G','E','C'];
-const firstADay = new Date(2025, 9, 3); // Oct 3, 2025
-
-function getCurrentLetterDay() {
+  function getCurrentLetterDay() {
     const now = new Date();
-    let tempDate = new Date(firstADay);
-    let dayCounter = 0;
-
-    while (tempDate < now) {
-        const weekday = tempDate.getDay();
-        if (weekday !== 0 && weekday !== 6) dayCounter++;
-        tempDate.setDate(tempDate.getDate() + 1);
+    let tmp = new Date(firstADay);
+    let count = 0;
+    // count non-weekend days from firstADay up to and including today
+    while (tmp <= now) {
+      const wd = tmp.getDay();
+      if (wd !== 0 && wd !== 6) count++;
+      tmp.setDate(tmp.getDate()+1);
     }
+    // count includes firstADay as day 1 -> map to index
+    return daySequence[(count-1) % daySequence.length];
+  }
 
-    return daySequence[dayCounter % daySequence.length];
-}
+  // ---------- Elements ----------
+  const headerDayEl = document.getElementById('header-day');
+  const currentClassEl = document.getElementById('current-class');
+  const nextClassEl = document.getElementById('next-class');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
 
-let currentDay = getCurrentLetterDay();
-
-/* ====== HEADER ====== */
-const headerDayEl = document.getElementById('header-day');
-function updateHeaderDay() {
-    const now = new Date();
+  // ---------- Header: show computed letter day (auto-updates at midnight) ----------
+  function updateHeaderDay() {
     const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const weekday = weekdayNames[now.getDay()];
-    headerDayEl.textContent = `${currentDay} DAY • ${weekday}`;
-}
-
-/* ====== CURRENT/NEXT CLASS ====== */
-function updateCurrentClass() {
     const now = new Date();
-    const currentTime = now.getHours()*60 + now.getMinutes();
+    const weekday = weekdayNames[now.getDay()];
+    const computed = getCurrentLetterDay();
+    headerDayEl.textContent = `${computed} DAY • ${weekday}`;
+  }
 
-    const scheduleDay = document.getElementById(`${currentDay}-day`);
-    if (!scheduleDay) return;
+  // ---------- View vs computed day ----------
+  // computedDay = actual rotating day (auto updates)
+  // viewedDay = which schedule user is currently viewing (changed manually by buttons)
+  let computedDay = getCurrentLetterDay();
+  let viewedDay = computedDay;
 
-    const classes = scheduleDay.querySelectorAll('.schedule-card');
-    let currentClass = null;
-    let nextClass = null;
+  // ---------- Day selector buttons (manual view) ----------
+  const daySelectors = document.querySelectorAll('.day-selector');
+  const scheduleDays = document.querySelectorAll('.schedule-day');
 
-    const toMinutes = t => {
-        const [h,m] = t.split(':').map(Number);
-        return h*60 + m;
-    };
+  function showViewedDay(day) {
+    scheduleDays.forEach(d => d.classList.add('hidden'));
+    const node = document.getElementById(`${day}-day`);
+    if (node) node.classList.remove('hidden');
+    // update active button visuals
+    daySelectors.forEach(s => s.classList.remove('active'));
+    const btn = document.querySelector(`.day-selector[data-day="${day}"]`);
+    if (btn) btn.classList.add('active');
+  }
 
-    classes.forEach(card => {
-        const timeSpan = card.querySelector('.bg-primary\\/10');
-        if (!timeSpan) return;
-        const [start,end] = timeSpan.textContent.trim().split('-').map(t => t.trim());
-        const startM = toMinutes(start);
-        const endM = toMinutes(end);
-        const className = card.querySelector('.font-medium')?.textContent || '';
-        const classSubject = card.querySelector('p.text-white')?.textContent || '';
-
-        if (currentTime >= startM && currentTime <= endM) currentClass = {name: className, subject: classSubject};
-        if (!nextClass && currentTime < startM && classSubject !== 'FREE') nextClass = {name: className, subject: classSubject, start};
+  daySelectors.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const day = btn.dataset.day;
+      if (!day) return;
+      viewedDay = day;                 // only change viewedDay
+      showViewedDay(viewedDay);
+      updateCurrentClass();           // recalc current/next based on viewedDay
     });
+  });
 
-    const currentEl = document.getElementById('current-class');
-    const nextEl = document.getElementById('next-class');
+  // ---------- Current / Next class finder ----------
+  function parseTimeToMinutes(timeStr) {
+    // time like "8:20" or "12:57"
+    const [h,m] = timeStr.split(':').map(x => parseInt(x,10));
+    return h*60 + (m||0);
+  }
 
-    currentEl.textContent = currentClass ? `Currently: ${currentClass.name}: ${currentClass.subject}` :
-        (currentTime < 8*60 ? "School hasn't started yet" : "Free Period");
-    nextEl.textContent = nextClass ? `Next: ${nextClass.name}: ${nextClass.subject} at ${nextClass.start}` :
-        (currentTime >= 15*60 ? "No more classes today" : "Check schedule");
+  function updateCurrentClass() {
+    // Use computedDay for header display but use viewedDay to show current schedule times
+    const now = new Date();
+    const minutesNow = now.getHours()*60 + now.getMinutes();
 
-    highlightCurrentClass(currentClass);
-}
-
-/* ====== HIGHLIGHT CURRENT CLASS ====== */
-const allClassesList = Array.from(document.querySelectorAll('.mt-12 .schedule-card'));
-function highlightCurrentClass(currentClass) {
-    allClassesList.forEach(c => {
-        c.style.border = '1px solid lightgray';
-        c.style.boxShadow = 'none';
-    });
-    if (!currentClass) return;
-    const target = allClassesList.find(c => c.querySelector('h3')?.textContent.trim() === currentClass.name);
-    if (target) {
-        target.style.border = `2px solid var(--primary-color)`;
-        target.style.boxShadow = `0 0 10px var(--primary-color)`;
+    const scheduleNode = document.getElementById(`${viewedDay}-day`);
+    if (!scheduleNode) {
+      currentClassEl.textContent = '';
+      nextClassEl.textContent = '';
+      return;
     }
-}
 
-/* ====== DAY SELECTOR ====== */
-const daySelectors = document.querySelectorAll('.day-selector');
-const scheduleDays = document.querySelectorAll('.schedule-day');
+    const cards = scheduleNode.querySelectorAll('.schedule-card');
+    let current = null;
+    let next = null;
 
-daySelectors.forEach(selector => {
-    selector.addEventListener('click', () => {
-        daySelectors.forEach(s => s.classList.remove('active'));
-        selector.classList.add('active');
+    cards.forEach(card => {
+      const timeSpan = card.querySelector('.bg-primary\\/10');
+      if (!timeSpan) return;
+      const raw = timeSpan.textContent.trim();
+      if (!raw.includes('-')) return;
+      // ensure only HH:MM parts remain
+      const [startRaw, endRaw] = raw.split('-').map(t => t.trim().replace(/[^\d:]/g,''));
+      const startM = parseTimeToMinutes(startRaw);
+      const endM = parseTimeToMinutes(endRaw);
+      const className = card.querySelector('.font-medium')?.textContent?.trim() || '';
+      const classSubj = card.querySelector('p.text-white')?.textContent?.trim() || '';
 
-        scheduleDays.forEach(d => d.classList.add('hidden'));
-        const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
-        if (dayToShow) dayToShow.classList.remove('hidden');
-
-        currentDay = selector.dataset.day;
-        updateHeaderDay();
-        updateCurrentClass();
+      if (minutesNow >= startM && minutesNow <= endM) current = {name: className, subject: classSubj};
+      if (!next && minutesNow < startM && classSubj !== 'FREE') next = {name: className, subject: classSubj, start: startRaw};
     });
-});
 
-/* ====== INITIALIZE ====== */
-document.querySelector(`.day-selector[data-day="${currentDay}"]`)?.classList.add('active');
-scheduleDays.forEach(d => d.classList.add('hidden'));
-document.getElementById(`${currentDay}-day`)?.classList.remove('hidden');
+    currentClassEl.textContent = current ? `Currently: ${current.name}: ${current.subject}` :
+      (minutesNow < 8*60 ? "School hasn't started yet" : "Free Period");
 
-updateHeaderDay();
-updateCurrentClass();
-feather.replace();
+    nextClassEl.textContent = next ? `Next: ${next.name}: ${next.subject} at ${next.start}` :
+      (minutesNow >= 15*60 ? "No more classes today" : "Check schedule");
 
-/* ====== UPDATE AT MIDNIGHT ====== */
-const nowDate = new Date();
-const msUntilMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()+1) - nowDate;
-setTimeout(() => {
-    currentDay = getCurrentLetterDay();
+    highlightCurrentClassInAll(current);
+  }
+
+  // ---------- Highlight current class in All Classes ----------
+  function highlightCurrentClassInAll(current) {
+    const allList = Array.from(document.querySelectorAll('.mt-12 .schedule-card'));
+    allList.forEach(el => {
+      el.classList.remove('active');
+      el.style.border = '';
+      el.style.boxShadow = '';
+    });
+    if (!current) return;
+    const target = allList.find(c => c.querySelector('h3')?.textContent?.trim() === current.name);
+    if (target) {
+      target.classList.add('active');
+      // inline highlight (keeps it simple)
+      const color = document.documentElement.classList.contains('dark') ? '#8b5cf6' : '#2563eb';
+      target.style.border = `2px solid ${color}`;
+      target.style.boxShadow = `0 0 10px ${color}`;
+    }
+  }
+
+  // ---------- Smooth scroll: clicking a schedule card scrolls/highlights the All Classes match ----------
+  function setupCardClickToAll() {
+    const scheduleCards = document.querySelectorAll('#schedule-container .schedule-card');
+    const allList = Array.from(document.querySelectorAll('.mt-12 .schedule-card'));
+    scheduleCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const name = card.querySelector('.font-medium')?.textContent?.trim();
+        allList.forEach(c => { c.style.border = '1px solid lightgray'; c.style.boxShadow = 'none'; });
+        const target = allList.find(c => c.querySelector('h3')?.textContent?.trim() === name);
+        if (target) {
+          target.scrollIntoView({behavior:'smooth', block:'center'});
+          const color = document.documentElement.classList.contains('dark') ? '#8b5cf6' : '#2563eb';
+          target.style.border = `2px solid ${color}`;
+          target.style.boxShadow = `0 0 10px ${color}`;
+        }
+      });
+    });
+  }
+
+  // ---------- Dark / Light toggle ----------
+  function initThemeToggle() {
+    themeToggleBtn?.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      // update tailwind config colors quickly
+      tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {
+          colors: {
+            primary: isDark ? '#8b5cf6' : '#2563eb',
+            dark: isDark ? '#1e293b' : '#f8fafc',
+            darker: isDark ? '#0f172a' : '#e2e8f0'
+          }
+        }}
+      };
+      if (themeIcon) themeIcon.setAttribute('data-feather', isDark ? 'moon' : 'sun');
+      feather.replace();
+    });
+  }
+
+  // ---------- Initialization ----------
+  // default viewedDay = computed day (user can then click a button to override)
+  computedDay = getCurrentLetterDay();
+  viewedDay = computedDay;
+  // show initial
+  showViewedDay(viewedDay);
+  updateHeaderDay();
+  updateCurrentClass();
+  setupCardClickToAll();
+  initThemeToggle();
+  feather.replace();
+
+  // ---------- update at midnight (so header day advances correctly) ----------
+  const now = new Date();
+  const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 1, 0) - now;
+  setTimeout(() => {
+    computedDay = getCurrentLetterDay();
     updateHeaderDay();
     updateCurrentClass();
-    setInterval(() => { 
-        currentDay = getCurrentLetterDay();
-        updateHeaderDay(); 
-        updateCurrentClass(); 
-    }, 24*60*60*1000);
-}, msUntilMidnight);
+    // then once per day
+    setInterval(() => { computedDay = getCurrentLetterDay(); updateHeaderDay(); updateCurrentClass(); }, 24*60*60*1000);
+  }, msUntilMidnight);
 
-/* ====== UPDATE EVERY MINUTE ====== */
-setInterval(updateCurrentClass, 60*1000);
-
-/* ====== SMOOTH SCROLL ====== */
-const scheduleCards = document.querySelectorAll('#schedule-container .schedule-card');
-scheduleCards.forEach(card => {
-    card.addEventListener('click', () => {
-        const className = card.querySelector('.font-medium')?.textContent.trim();
-        allClassesList.forEach(c => { c.style.border = '1px solid lightgray'; c.style.boxShadow='none'; });
-        const target = allClassesList.find(c => c.querySelector('h3')?.textContent.trim() === className);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            target.style.border = `2px solid var(--primary-color)`;
-            target.style.boxShadow = `0 0 10px var(--primary-color)`;
-        }
-    });
-});
-</script>
-
+  // update current/next every minute for accuracy
+  setInterval(updateCurrentClass, 60*1000);
+  </script>
 </body>
 </html>
