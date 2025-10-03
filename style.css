@@ -1,6 +1,33 @@
+/* ==========================
+   Root Variables for Themes
+   ========================== */
+:root {
+    --primary-color: #2563eb;
+    --bg-color: #f8fafc;
+    --text-color: #1f2937;
+    --card-bg: #fff;
+    --card-border: lightgray;
+    --card-hover-shadow: rgba(0,0,0,0.1);
+}
+
+.dark {
+    --primary-color: #8b5cf6;
+    --bg-color: #1e293b;
+    --text-color: #f8fafc;
+    --card-bg: #0f172a;
+    --card-border: #374151; /* dark gray */
+    --card-hover-shadow: rgba(0,0,0,0.5);
+}
+
+/* ==========================
+   Body & Typography
+   ========================== */
 body {
     padding: 2rem;
     font-family: -apple-system, BlinkMacSystemFont, "Arial", sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 h1 {
@@ -9,32 +36,60 @@ h1 {
 }
 
 p {
-    color: rgb(107, 114, 128);
+    color: var(--text-color);
     font-size: 15px;
-    margin-bottom: 10px;
-    margin-top: 5px;
+    margin: 5px 0 10px 0;
 }
 
+/* ==========================
+   Cards & Schedule Cards
+   ========================== */
 .card, .schedule-card {
     max-width: 620px;
     margin: 0 auto 1rem;
     padding: 16px;
-    border: 1px solid lightgray;
+    border: 1px solid var(--card-border);
     border-radius: 16px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
     transition: all 0.3s ease;
 }
 
 .schedule-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px var(--card-hover-shadow);
 }
 
 .schedule-card.active {
     border-width: 2px;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 10px #8b5cf6;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
 }
 
 .card p:last-child {
     margin-bottom: 0;
+}
+
+/* ==========================
+   Optional Smooth Scroll Highlight
+   ========================== */
+.schedule-card.scroll-highlight {
+    border-width: 2px;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* ==========================
+   Day Selector (if used)
+   ========================== */
+.day-selector {
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.day-selector.active {
+    background-color: var(--primary-color);
+    color: #fff;
 }
