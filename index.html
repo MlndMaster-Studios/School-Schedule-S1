@@ -99,15 +99,15 @@
                             <span class="text-white text-sm">B Class</span>
                         </div>
                     </div>
-                    <div class="bg-dark p-4 rounded-lg">
-                        <div class="flex flex-col">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <i data-feather="calendar" class="text-primary w-4 h-4"></i>
-                                <h3 class="text-xs font-medium text-gray-400">Today</h3>
-                            </div>
-                            <span class="text-white text-sm">E Day</span>
-                        </div>
-                    </div>
+                  <div class="bg-dark p-4 rounded-lg">
+    <div class="flex flex-col">
+        <div class="flex items-center space-x-2 mb-1">
+            <i data-feather="calendar" class="text-primary w-4 h-4"></i>
+            <h3 class="text-xs font-medium text-gray-400">Today</h3>
+        </div>
+        <span id="header-day" class="text-white text-sm">E DAY</span>
+    </div>
+</div>
                 </div>
                 <div class="flex items-center space-x-3">
                     <div class="flex items-center space-x-2 bg-dark px-3 py-2 rounded-lg">
@@ -715,133 +715,140 @@
             </div>
         </div>
 
-        <footer class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-400">
-            <p>© 2023 Semester 1 Schedule • Property of Liam Quinn</p>
+       <footer class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-400">
+    <p>© 2023 Semester 1 Schedule • Property of Liam Quinn</p>
 </footer>
-    </div>
+</div>
 
-    <script>
-        // Theme toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            isDarkMode = document.documentElement.classList.contains('dark');
-            
-            // Update Tailwind config
-            tailwind.config = {
-                darkMode: 'class',
-                theme: {
-                    extend: {
-            colors: {
-                primary: isDarkMode ? '#8b5cf6' : '#2563eb',
-                dark: isDarkMode ? '#1e293b' : '#f8fafc',
-                darker: isDarkMode ? '#0f172a' : '#e2e8f0'
-}
+<script>
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        isDarkMode = document.documentElement.classList.contains('dark');
+        
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: isDarkMode ? '#8b5cf6' : '#2563eb',
+                        dark: isDarkMode ? '#1e293b' : '#f8fafc',
+                        darker: isDarkMode ? '#0f172a' : '#e2e8f0'
                     }
                 }
-            };
-            // Update UI elements
-            if (isDarkMode) {
-                themeIcon.setAttribute('data-feather', 'moon');
-            } else {
-                themeIcon.setAttribute('data-feather', 'sun');
             }
-            feather.replace();
-// Force reload of Tailwind classes
-            document.body.style.display = 'none';
-            document.body.offsetHeight; // Trigger reflow
-            document.body.style.display = '';
+        };
+
+        if (isDarkMode) {
+            themeIcon.setAttribute('data-feather', 'moon');
+        } else {
+            themeIcon.setAttribute('data-feather', 'sun');
+        }
+        feather.replace();
+
+        document.body.style.display = 'none';
+        document.body.offsetHeight;
+        document.body.style.display = '';
+    });
+
+    // Day selector functionality
+    const daySelectors = document.querySelectorAll('.day-selector');
+    const scheduleDays = document.querySelectorAll('.schedule-day');
+
+    daySelectors.forEach(selector => {
+        selector.addEventListener('click', () => {
+            daySelectors.forEach(s => s.classList.remove('active'));
+            selector.classList.add('active');
+
+            scheduleDays.forEach(day => day.classList.add('hidden'));
+            const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
+            if (dayToShow) dayToShow.classList.remove('hidden');
         });
-// Day selector functionality
-        const daySelectors = document.querySelectorAll('.day-selector');
-        const scheduleDays = document.querySelectorAll('.schedule-day');
-        
-        daySelectors.forEach(selector => {
-            selector.addEventListener('click', () => {
-                // Remove active class from all selectors
-                daySelectors.forEach(s => s.classList.remove('active'));
-                // Add active class to clicked selector
-                selector.classList.add('active');
-                
-                // Hide all schedule days
-                scheduleDays.forEach(day => day.classList.add('hidden'));
-                // Show selected schedule day
-                const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
-                if (dayToShow) dayToShow.classList.remove('hidden');
-            });
+    });
+
+    const daySequence = ['A', 'F', 'D', 'B', 'G', 'E', 'C'];
+    const now = new Date();
+    const daysSinceEpoch = Math.floor(now / (1000 * 60 * 60 * 24));
+    const dayIndex = daysSinceEpoch % daySequence.length;
+    const currentDay = daySequence[dayIndex];
+
+    document.querySelector(`.day-selector[data-day="${currentDay}"]`).classList.add('active');
+    document.querySelectorAll('.schedule-day').forEach(day => day.classList.add('hidden'));
+    document.getElementById(`${currentDay}-day`).classList.remove('hidden');
+
+    function updateCurrentClass() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        let currentClass = null;
+        let nextClass = null;
+
+        const scheduleDay = document.getElementById(`${currentDay}-day`);
+        const classes = scheduleDay.querySelectorAll('.schedule-card');
+
+        const timeToMinutes = (timeStr) => {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+
+        classes.forEach(classCard => {
+            const timeSpan = classCard.querySelector('.bg-primary\\/10');
+            if (!timeSpan) return;
+            const [startTime, endTime] = timeSpan.textContent.trim().split('-').map(t => t.trim());
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+
+            const className = classCard.querySelector('.font-medium').textContent;
+            const classSubject = classCard.querySelector('p.text-white').textContent;
+
+            if (currentTime >= startMinutes && currentTime <= endMinutes) {
+                currentClass = `${className}: ${classSubject}`;
+            }
+            if (!nextClass && currentTime < startMinutes && classSubject !== 'FREE') {
+                nextClass = `${className}: ${classSubject} at ${startTime}`;
+            }
         });
-        // Custom day rotation sequence: A, F, D, B, G, E, C
-        const daySequence = ['A', 'F', 'D', 'B', 'G', 'E', 'C'];
-        
-        // Get current day index based on date
+
+        const currentEl = document.getElementById('current-class');
+        const nextEl = document.getElementById('next-class');
+
+        currentEl.textContent = currentClass 
+            ? `Currently: ${currentClass}` 
+            : currentTime < 8*60 ? "School hasn't started yet" : "Free Period";
+
+        nextEl.textContent = nextClass 
+            ? `Next: ${nextClass}` 
+            : currentTime >= 15*60 ? "No more classes today" : "Check schedule";
+    }
+
+    feather.replace();
+</script>
+
+<script>
+    // Header day update
+    const headerDayEl = document.getElementById('header-day');
+
+    function updateHeaderDay() {
         const now = new Date();
         const daysSinceEpoch = Math.floor(now / (1000 * 60 * 60 * 24));
         const dayIndex = daysSinceEpoch % daySequence.length;
-        const currentDay = daySequence[dayIndex]; // Use calculated day
-        // Initialize the schedule to show current day's schedule
-document.querySelector(`.day-selector[data-day="${currentDay}"]`).classList.add('active');
-        document.querySelectorAll('.schedule-day').forEach(day => day.classList.add('hidden'));
-        document.getElementById(`${currentDay}-day`).classList.remove('hidden');
-        
-        // Function to determine current and next class
-       function updateCurrentClass() {
-    const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    
-    let currentClass = null;
-    let nextClass = null;
-    
-    // Get all classes for current day
-    const scheduleDay = document.getElementById(`${currentDay}-day`);
-    const classes = scheduleDay.querySelectorAll('.schedule-card');
-    
-    // Convert 24-hour time strings to minutes since midnight
-    const timeToMinutes = (timeStr) => {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    };
-    
-    classes.forEach((classCard) => {
-        const timeSpan = classCard.querySelector('.bg-primary\\/10');
-        if (!timeSpan) return;
-        
-        const timeRange = timeSpan.textContent.trim();
-        if (!timeRange.includes('-')) return;
-        
-        const [startTime, endTime] = timeRange.split('-').map(t => t.trim());
-        const startMinutes = timeToMinutes(startTime);
-        const endMinutes = timeToMinutes(endTime);
-        
-        const className = classCard.querySelector('.font-medium').textContent;
-        const classSubject = classCard.querySelector('p.text-white').textContent;
+        const currentLetter = daySequence[dayIndex];
 
-        // Current class
-        if (currentTime >= startMinutes && currentTime <= endMinutes) {
-            currentClass = `${className}: ${classSubject}`;
-        }
+        const weekdayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const weekday = weekdayNames[now.getDay()];
 
-        // Next class (skip FREE)
-        if (!nextClass && currentTime < startMinutes && classSubject !== 'FREE') {
-            nextClass = `${className}: ${classSubject} at ${startTime}`;
-        }
-    });
-    
-    // Update display
-    const currentEl = document.getElementById('current-class');
-    const nextEl = document.getElementById('next-class');
-    
-    currentEl.textContent = currentClass 
-        ? `Currently: ${currentClass}` 
-        : currentTime < 8*60 ? "School hasn't started yet" : "Free Period";
-        
-    nextEl.textContent = nextClass 
-        ? `Next: ${nextClass}` 
-        : currentTime >= 15*60 ? "No more classes today" : "Check schedule";
-}
-        
-        // Initialize feather icons
-        feather.replace();
+        headerDayEl.textContent = `${currentLetter} DAY • ${weekday}`;
+    }
+
+    updateHeaderDay();
+
+    const msUntilMidnight = new Date().setHours(24,0,1,0) - new Date();
+    setTimeout(() => {
+        updateHeaderDay();
+        setInterval(updateHeaderDay, 24 * 60 * 60 * 1000);
+    }, msUntilMidnight);
 </script>
+
 </body>
 </html>
