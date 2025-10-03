@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester 1 Schedule</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-darker text-white">
+
+<div class="container mx-auto p-6">
+
+    <!-- Current/Next Class Card -->
+    <div id="current-next-card" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-xl shadow-lg text-center max-w-md mx-auto my-6">
+        <h2 class="text-xl font-bold mb-2">Today</h2>
+        <p id="current-class" class="text-lg mb-1">Currently: Loading...</p>
+        <p id="next-class" class="text-md text-gray-600 dark:text-gray-300">Next: Loading...</p>
+    </div>
+
+    <!-- Schedule Days -->
+    <div class="schedule-day hidden" id="A-day">
+        <!-- Your existing A-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="F-day">
+        <!-- Your existing F-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="D-day">
+        <!-- Your existing D-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="B-day">
+        <!-- Your existing B-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="G-day">
+        <!-- Your existing G-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="E-day">
+        <!-- Your existing E-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="C-day">
+        <!-- Your existing C-day HTML here -->
+    </div>
+    <div class="schedule-day hidden" id="WED-day">
+        <!-- Your existing Wednesday schedule HTML here -->
+    </div>
+
+    <!-- All Classes Section -->
+    <div class="mt-12">
+        <h2 class="text-xl font-bold mb-4 text-white">All Classes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Your existing All Classes HTML here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-400">
+        <p>© 2023 Semester 1 Schedule • Property of Liam Quinn</p>
+    </footer>
+</div>
+
+<script>
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    themeToggle?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        if (isDarkMode) themeIcon?.setAttribute('data-feather', 'moon');
+        else themeIcon?.setAttribute('data-feather', 'sun');
+        feather.replace();
+    });
+
+    // Day selector functionality
+    const daySelectors = document.querySelectorAll('.day-selector');
+    const scheduleDays = document.querySelectorAll('.schedule-day');
+    
+    daySelectors.forEach(selector => {
+        selector.addEventListener('click', () => {
+            daySelectors.forEach(s => s.classList.remove('active'));
+            selector.classList.add('active');
+            scheduleDays.forEach(day => day.classList.add('hidden'));
+            const dayToShow = document.getElementById(`${selector.dataset.day}-day`);
+            if (dayToShow) dayToShow.classList.remove('hidden');
+        });
+    });
+
+    // Custom day rotation sequence: A, F, D, B, G, E, C
+    const daySequence = ['A', 'F', 'D', 'B', 'G', 'E', 'C'];
+    const now = new Date();
+    const daysSinceEpoch = Math.floor(now / (1000 * 60 * 60 * 24));
+    const dayIndex = daysSinceEpoch % daySequence.length;
+    const currentDay = daySequence[dayIndex];
+
+    document.querySelector(`.day-selector[data-day="${currentDay}"]`)?.classList.add('active');
+    scheduleDays.forEach(day => day.classList.add('hidden'));
+    document.getElementById(`${currentDay}-day`)?.classList.remove('hidden');
+
+    // Function to determine current and next class
+    function updateCurrentClass() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        let currentClass = null;
+        let nextClass = null;
+        const scheduleDay = document.getElementById(`${currentDay}-day`);
+        const classes = scheduleDay?.querySelectorAll('.schedule-card') || [];
+
+        const timeToMinutes = (timeStr) => {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+
+        classes.forEach(classCard => {
+            const timeSpan = classCard.querySelector('.bg-primary\\/10');
+            if (!timeSpan) return;
+            const [start, end] = timeSpan.textContent.trim().split('-').map(t => {
+                const [h, m] = t.split(':').map(Number);
+                return h * 60 + m;
+            });
+
+            if (currentTime >= start && currentTime <= end) {
+                currentClass = `${classCard.querySelector('.font-medium').textContent}: ${classCard.querySelector('p.text-white').textContent}`;
+            } else if (currentTime < start && !nextClass) {
+                nextClass = `${classCard.querySelector('.font-medium').textContent}: ${classCard.querySelector('p.text-white').textContent} at ${timeSpan.textContent.split('-')[0].trim()}`;
+            }
+        });
+
+        document.getElementById('current-class').textContent = currentClass ? `Currently: ${currentClass}` : currentTime < 8*60 ? "School hasn't started yet" : "Free Period";
+        document.getElementById('next-class').textContent = nextClass ? `Next: ${nextClass}` : currentTime >= 15*60 ? "No more classes today" : "Check schedule";
+    }
+
+    updateCurrentClass();
+    setInterval(updateCurrentClass, 60000);
+
+    feather.replace();
+</script>
+</body>
+</html>
